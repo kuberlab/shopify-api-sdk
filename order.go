@@ -25,6 +25,7 @@ type OrderService interface {
 	Cancel(int64, interface{}) (*Order, error)
 	Close(int64) (*Order, error)
 	Open(int64) (*Order, error)
+	ListFulfillmentOrders(int64) ([]FulfillmentOrder, error)
 
 	// MetafieldsService used for Order resource to communicate with Metafields resource
 	MetafieldsService
@@ -544,4 +545,10 @@ func (s *OrderServiceOp) TransitionFulfillment(orderID int64, fulfillmentID int6
 func (s *OrderServiceOp) CancelFulfillment(orderID int64, fulfillmentID int64) (*Fulfillment, error) {
 	fulfillmentService := &FulfillmentServiceOp{client: s.client, resource: ordersResourceName, resourceID: orderID}
 	return fulfillmentService.Cancel(fulfillmentID)
+}
+
+// ListFulfillmentOrders Retrieves a list of fulfillment orders for a specific order
+func (s *OrderServiceOp) ListFulfillmentOrders(orderID int64) ([]FulfillmentOrder, error) {
+	fulfillmentOrder := &FulfillmentOrderServiceOp{client: s.client}
+	return fulfillmentOrder.List(orderID)
 }
