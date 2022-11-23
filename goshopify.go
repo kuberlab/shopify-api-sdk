@@ -117,6 +117,7 @@ type Client struct {
 	ProductListing             ProductListingService
 	AccessScopes               AccessScopesService
 	FulfillmentService         FulfillmentServiceService
+	OrderGraphql               OrderGraphqlService
 }
 
 // A general response error that follows a similar layout to Shopify's response
@@ -230,6 +231,31 @@ func (c *Client) NewRequest(method, relPath string, body, options interface{}) (
 	return req, nil
 }
 
+func (c *Client) NewGraphqlRequest(method, relPath, body string) (*http.Request, error) {
+	rel, err := url.Parse(relPath)
+	if err != nil {
+		return nil, err
+	}
+
+	// Make the full url based on the relative path
+	u := c.baseURL.ResolveReference(rel)
+
+	req, err := http.NewRequest(method, u.String(), strings.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", "application/graphql")
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("User-Agent", UserAgent)
+	if c.token != "" {
+		req.Header.Add("X-Shopify-Access-Token", c.token)
+	} else if c.app.Password != "" {
+		req.SetBasicAuth(c.app.ApiKey, c.app.Password)
+	}
+	return req, nil
+}
+
 // NewClient returns a new Shopify API client with an already authenticated shopname and
 // token. The shopName parameter is the shop's myshopify domain,
 // e.g. "theshop.myshopify.com", or simply "theshop"
@@ -293,6 +319,7 @@ func NewClient(app App, shopName, token string, opts ...Option) *Client {
 	c.ProductListing = &ProductListingServiceOp{client: c}
 	c.AccessScopes = &AccessScopesServiceOp{client: c}
 	c.FulfillmentService = &FulfillmentServiceServiceOp{client: c}
+	c.OrderGraphql = &OrderGraphqlServiceOp{client: c}
 
 	// apply any options
 	for _, opt := range opts {
@@ -596,6 +623,16 @@ func (c *Client) CreateAndDo(method, relPath string, data, options, resource int
 	return nil
 }
 
+func (c *Client) CreateAndDoGraphql(method, data string, resource interface{}) (http.Header, error) {
+	relPath := path.Join(c.pathPrefix, graphqlBasePath)
+	req, err := c.NewGraphqlRequest(method, relPath, data)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.doGetHeaders(req, resource)
+}
+
 // createAndDoGetHeaders creates an executes a request while returning the response headers.
 func (c *Client) createAndDoGetHeaders(method, relPath string, data, options, resource interface{}) (http.Header, error) {
 	if strings.HasPrefix(relPath, "/") {
@@ -633,4 +670,11 @@ func (c *Client) Put(path string, data, resource interface{}) error {
 // Delete performs a DELETE request for the given path
 func (c *Client) Delete(path string) error {
 	return c.CreateAndDo("DELETE", path, nil, nil, nil)
+}
+
+// PostGraphql performs a POST request for the graphql given path and saves the result in the
+// given resource.
+func (c *Client) PostGraphql(data string, resource interface{}) error {
+	_, err := c.CreateAndDoGraphql("POST", data, resource)
+	return err
 }

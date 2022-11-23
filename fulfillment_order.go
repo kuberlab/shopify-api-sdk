@@ -78,6 +78,7 @@ type MerchantRequest struct {
 	RequestOptions *RequestOptions `json:"request_options,omitempty"`
 	Kind           string          `json:"kind,omitempty"`
 }
+
 type RequestOptions struct {
 	ShippingMethod string     `json:"shipping_method,omitempty"`
 	Note           string     `json:"note,omitempty"`

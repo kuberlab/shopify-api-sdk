@@ -12,11 +12,13 @@ type FulfillmentService interface {
 	List(interface{}) ([]Fulfillment, error)
 	Count(interface{}) (int, error)
 	Get(int64, interface{}) (*Fulfillment, error)
+	// Deprecated
 	Create(Fulfillment) (*Fulfillment, error)
 	Update(Fulfillment) (*Fulfillment, error)
 	Complete(int64) (*Fulfillment, error)
 	Transition(int64) (*Fulfillment, error)
 	Cancel(int64) (*Fulfillment, error)
+	CreateFulfillment(FulfillmentCreate) (*Fulfillment, error)
 }
 
 // FulfillmentsService is an interface for other Shopify resources
@@ -102,11 +104,44 @@ func (s *FulfillmentServiceOp) Get(fulfillmentID int64, options interface{}) (*F
 	return resource.Fulfillment, err
 }
 
-// Create a new fulfillment
+// Deprecated a new fulfillment
 func (s *FulfillmentServiceOp) Create(fulfillment Fulfillment) (*Fulfillment, error) {
 	prefix := FulfillmentPathPrefix(s.resource, s.resourceID)
 	path := fmt.Sprintf("%s.json", prefix)
 	wrappedData := FulfillmentResource{Fulfillment: &fulfillment}
+	resource := new(FulfillmentResource)
+	err := s.client.Post(path, wrappedData, resource)
+	return resource.Fulfillment, err
+}
+
+type TrackingInfo struct {
+	Number  string `json:"number,omitempty"`
+	URL     string `json:"url,omitempty"`
+	Company string `json:"company,omitempty"`
+}
+
+type LineItemsByFulfillmentOrder struct {
+	FulfillmentOrderID        int64                      `json:"fulfillment_order_id,omitempty"`
+	FulfillmentOrderLineItems []FulfillmentOrderLineItem `json:"fulfillment_order_line_items,omitempty"`
+}
+
+type FulfillmentCreate struct {
+	Message                     string                        `json:"message,omitempty"`
+	NotifyCustomer              bool                          `json:"notify_customer,omitempty"`
+	TrackingInfo                TrackingInfo                  `json:"tracking_info,omitempty"`
+	LineItemsByFulfillmentOrder []LineItemsByFulfillmentOrder `json:"line_items_by_fulfillment_order,omitempty"`
+}
+
+// CreateFulfillment create a new fulfillment
+// https://shopify.dev/api/admin-rest/2022-10/resources/fulfillment#post-fulfillments
+func (s *FulfillmentServiceOp) CreateFulfillment(fulfillmentCreate FulfillmentCreate) (*Fulfillment, error) {
+	prefix := FulfillmentPathPrefix(s.resource, s.resourceID)
+	path := fmt.Sprintf("%s.json", prefix)
+	wrappedData := struct {
+		Fulfillment FulfillmentCreate `json:"fulfillment"`
+	}{
+		Fulfillment: fulfillmentCreate,
+	}
 	resource := new(FulfillmentResource)
 	err := s.client.Post(path, wrappedData, resource)
 	return resource.Fulfillment, err
