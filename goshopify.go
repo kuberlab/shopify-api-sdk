@@ -118,6 +118,7 @@ type Client struct {
 	AccessScopes               AccessScopesService
 	FulfillmentService         FulfillmentServiceService
 	OrderGraphql               OrderGraphqlService
+	InventoryLevel             InventoryLevelService
 }
 
 // A general response error that follows a similar layout to Shopify's response
@@ -320,6 +321,7 @@ func NewClient(app App, shopName, token string, opts ...Option) *Client {
 	c.AccessScopes = &AccessScopesServiceOp{client: c}
 	c.FulfillmentService = &FulfillmentServiceServiceOp{client: c}
 	c.OrderGraphql = &OrderGraphqlServiceOp{client: c}
+	c.InventoryLevel = &InventoryLevelServiceOp{client: c}
 
 	// apply any options
 	for _, opt := range opts {
@@ -587,7 +589,7 @@ type ListOptions struct {
 	Order        string    `url:"order,omitempty"`
 	Fields       string    `url:"fields,omitempty"`
 	Vendor       string    `url:"vendor,omitempty"`
-	IDs          []int64   `url:"ids,omitempty,comma"`
+	IDs          string    `url:"ids,omitempty"`
 }
 
 // General count options that can be used for most collection counts.
