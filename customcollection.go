@@ -31,18 +31,19 @@ type CustomCollectionServiceOp struct {
 
 // CustomCollection represents a Shopify custom collection.
 type CustomCollection struct {
-	ID             int64       `json:"id"`
-	Handle         string      `json:"handle"`
-	Title          string      `json:"title"`
-	UpdatedAt      *time.Time  `json:"updated_at"`
-	BodyHTML       string      `json:"body_html"`
-	SortOrder      string      `json:"sort_order"`
-	TemplateSuffix string      `json:"template_suffix"`
-	Image          Image       `json:"image"`
-	Published      bool        `json:"published"`
-	PublishedAt    *time.Time  `json:"published_at"`
-	PublishedScope string      `json:"published_scope"`
+	ID             int64       `json:"id,omitempty"`
+	Handle         string      `json:"handle,omitempty"`
+	Title          string      `json:"title,omitempty"`
+	UpdatedAt      *time.Time  `json:"updated_at,omitempty"`
+	BodyHTML       string      `json:"body_html,omitempty"`
+	SortOrder      string      `json:"sort_order,omitempty"`
+	TemplateSuffix string      `json:"template_suffix,omitempty"`
+	Image          Image       `json:"image,omitempty"`
+	Published      bool        `json:"published,omitempty"`
+	PublishedAt    *time.Time  `json:"published_at,omitempty"`
+	PublishedScope string      `json:"published_scope,omitempty"`
 	Metafields     []Metafield `json:"metafields,omitempty"`
+	Collects       []Collect   `json:"collects,omitempty"`
 }
 
 // CustomCollectionResource represents the result form the custom_collections/X.json endpoint
@@ -53,6 +54,16 @@ type CustomCollectionResource struct {
 // CustomCollectionsResource represents the result from the custom_collections.json endpoint
 type CustomCollectionsResource struct {
 	Collections []CustomCollection `json:"custom_collections"`
+}
+
+type CustomCollectionListOptions struct {
+	Fields    string `url:"fields,omitempty"`
+	Handle    string `url:"handle,omitempty"`
+	Ids       string `url:"ids,omitempty"`
+	Limit     int    `url:"limit,omitempty"`
+	ProductId int64  `url:"product_id,omitempty"`
+	Title     string `url:"title,omitempty"`
+	SinceId   int64  `url:"since_id,omitempty"`
 }
 
 // List custom collections

@@ -12,6 +12,7 @@ const collectsBasePath = "collects"
 // See: https://help.shopify.com/api/reference/products/collect
 type CollectService interface {
 	List(interface{}) ([]Collect, error)
+	Create(Collect) (*Collect, error)
 	Count(interface{}) (int, error)
 }
 
@@ -49,6 +50,14 @@ func (s *CollectServiceOp) List(options interface{}) ([]Collect, error) {
 	resource := new(CollectsResource)
 	err := s.client.Get(path, resource, options)
 	return resource.Collects, err
+}
+
+func (s *CollectServiceOp) Create(collect Collect) (*Collect, error) {
+	path := fmt.Sprintf("%s.json", collectsBasePath)
+	wrappedData := CollectResource{Collect: &collect}
+	resource := new(CollectResource)
+	err := s.client.Post(path, wrappedData, resource)
+	return resource.Collect, err
 }
 
 // Count collects
