@@ -74,15 +74,15 @@ type ProductOption struct {
 
 type ProductListOptions struct {
 	ListOptions
-	CollectionID          int64     `url:"collection_id,omitempty"`
-	ProductType           string    `url:"product_type,omitempty"`
-	Vendor                string    `url:"vendor,omitempty"`
-	Handle                string    `url:"handle,omitempty"`
-	PublishedAtMin        time.Time `url:"published_at_min,omitempty"`
-	PublishedAtMax        time.Time `url:"published_at_max,omitempty"`
-	PublishedStatus       string    `url:"published_status,omitempty"`
-	PresentmentCurrencies string    `url:"presentment_currencies,omitempty"`
-	Title                 string    `url:"title,omitempty"`
+	CollectionID          int64      `url:"collection_id,omitempty"`
+	ProductType           string     `url:"product_type,omitempty"`
+	Vendor                string     `url:"vendor,omitempty"`
+	Handle                string     `url:"handle,omitempty"`
+	PublishedAtMin        *time.Time `url:"published_at_min,omitempty"`
+	PublishedAtMax        *time.Time `url:"published_at_max,omitempty"`
+	PublishedStatus       string     `url:"published_status,omitempty"`
+	PresentmentCurrencies string     `url:"presentment_currencies,omitempty"`
+	Title                 string     `url:"title,omitempty"`
 }
 
 // Represents the result from the products/X.json endpoint
