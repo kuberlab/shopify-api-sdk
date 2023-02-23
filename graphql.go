@@ -9,3 +9,8 @@ type GraphqlErrors struct {
 		Message string `json:"message,omitempty"`
 	} `json:"errors,omitempty"`
 }
+
+type GraphqlRequest struct {
+	Query     string `json:"query,omitempty"`
+	Variables any    `json:"variables,omitempty"`
+}

@@ -33,7 +33,7 @@ type OrderGraphqlServiceOp struct {
 }
 
 func (g *OrderGraphqlServiceOp) GetLocalizationExtensions(orderID int64) (*LocalizationExtensions, error) {
-	query := fmt.Sprintf(`{
+	query := fmt.Sprintf(`query {
       order(id: "gid://shopify/Order/%d") {
         id
         localizationExtensions(first: 100) {
@@ -49,7 +49,9 @@ func (g *OrderGraphqlServiceOp) GetLocalizationExtensions(orderID int64) (*Local
       }
     }`, orderID)
 	resource := new(LocalizationExtensions)
-	if err := g.client.PostGraphql(query, resource); err != nil {
+	if err := g.client.PostGraphql(&GraphqlRequest{
+		Query: query,
+	}, resource); err != nil {
 		return nil, err
 	}
 	if len(resource.Errors) > 0 {

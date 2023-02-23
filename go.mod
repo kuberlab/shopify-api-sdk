@@ -1,6 +1,6 @@
 module github.com/dsers/shopify-api-sdk/v3
 
-go 1.13
+go 1.18
 
 require (
 	github.com/google/go-querystring v1.0.0

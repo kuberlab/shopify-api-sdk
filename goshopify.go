@@ -119,6 +119,7 @@ type Client struct {
 	FulfillmentService         FulfillmentServiceService
 	OrderGraphql               OrderGraphqlService
 	InventoryLevel             InventoryLevelService
+	FulfillmentGraphql         FulfillmentGraphqlService
 }
 
 // A general response error that follows a similar layout to Shopify's response
@@ -232,7 +233,7 @@ func (c *Client) NewRequest(method, relPath string, body, options interface{}) (
 	return req, nil
 }
 
-func (c *Client) NewGraphqlRequest(method, relPath, body string) (*http.Request, error) {
+func (c *Client) NewGraphqlRequest(method, relPath string, body *GraphqlRequest) (*http.Request, error) {
 	rel, err := url.Parse(relPath)
 	if err != nil {
 		return nil, err
@@ -241,12 +242,17 @@ func (c *Client) NewGraphqlRequest(method, relPath, body string) (*http.Request,
 	// Make the full url based on the relative path
 	u := c.baseURL.ResolveReference(rel)
 
-	req, err := http.NewRequest(method, u.String(), strings.NewReader(body))
+	bodyByte, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Add("Content-Type", "application/graphql")
+	req, err := http.NewRequest(method, u.String(), bytes.NewReader(bodyByte))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("User-Agent", UserAgent)
 	if c.token != "" {
@@ -322,6 +328,7 @@ func NewClient(app App, shopName, token string, opts ...Option) *Client {
 	c.FulfillmentService = &FulfillmentServiceServiceOp{client: c}
 	c.OrderGraphql = &OrderGraphqlServiceOp{client: c}
 	c.InventoryLevel = &InventoryLevelServiceOp{client: c}
+	c.FulfillmentGraphql = &FulfillmentGraphqlServiceOp{client: c}
 
 	// apply any options
 	for _, opt := range opts {
@@ -625,7 +632,7 @@ func (c *Client) CreateAndDo(method, relPath string, data, options, resource int
 	return nil
 }
 
-func (c *Client) CreateAndDoGraphql(method, data string, resource interface{}) (http.Header, error) {
+func (c *Client) CreateAndDoGraphql(method string, data *GraphqlRequest, resource interface{}) (http.Header, error) {
 	relPath := path.Join(c.pathPrefix, graphqlBasePath)
 	req, err := c.NewGraphqlRequest(method, relPath, data)
 	if err != nil {
@@ -676,7 +683,7 @@ func (c *Client) Delete(path string) error {
 
 // PostGraphql performs a POST request for the graphql given path and saves the result in the
 // given resource.
-func (c *Client) PostGraphql(data string, resource interface{}) error {
+func (c *Client) PostGraphql(data *GraphqlRequest, resource interface{}) error {
 	_, err := c.CreateAndDoGraphql("POST", data, resource)
 	return err
 }
