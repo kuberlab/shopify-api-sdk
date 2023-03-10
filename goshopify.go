@@ -345,7 +345,7 @@ func (c *Client) Do(req *http.Request, v interface{}) error {
 	attempts := 5
 	for attempts > 0 {
 		_, err := c.doGetHeaders(req, v)
-		if err != nil && strings.Contains(err.Error(), "invalid character '<' looking for beginning of value") {
+		if err != nil && strings.Contains(err.Error(), "looking for beginning of value") {
 			attempts--
 			continue
 		} else if err != nil {
