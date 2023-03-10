@@ -661,6 +661,17 @@ func (c *Client) createAndDoGetHeaders(method, relPath string, data, options, re
 		return nil, err
 	}
 
+	attempts := 5
+	for attempts > 0 {
+		headers, err := c.doGetHeaders(req, resource)
+		if err != nil && strings.Contains(err.Error(), "looking for beginning of value") {
+			attempts--
+			continue
+		} else if err != nil {
+			return nil, err
+		}
+		return headers, nil
+	}
 	return c.doGetHeaders(req, resource)
 }
 
