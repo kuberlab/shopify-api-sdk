@@ -342,11 +342,17 @@ func NewClient(app App, shopName, token string, opts ...Option) *Client {
 // response. It does not make much sense to call Do without a prepared
 // interface instance.
 func (c *Client) Do(req *http.Request, v interface{}) error {
-	_, err := c.doGetHeaders(req, v)
-	if err != nil {
-		return err
+	attempts := 5
+	for attempts > 0 {
+		_, err := c.doGetHeaders(req, v)
+		if err != nil && strings.Contains(err.Error(), "invalid character '<' looking for beginning of value") {
+			attempts--
+			continue
+		} else if err != nil {
+			return err
+		}
+		return nil
 	}
-
 	return nil
 }
 
