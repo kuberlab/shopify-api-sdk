@@ -33,7 +33,8 @@ const (
 
 var (
 	// version regex match
-	apiVersionRegex = regexp.MustCompile(`^[0-9]{4}-[0-9]{2}$`)
+	apiVersionRegex   = regexp.MustCompile(`^[0-9]{4}-[0-9]{2}$`)
+	throttleSleepTime = 1 * time.Second
 )
 
 // App represents basic app settings such as Api key, secret, scope, and redirect url.
@@ -347,7 +348,7 @@ func (c *Client) Do(req *http.Request, v interface{}) error {
 		_, err := c.doGetHeaders(req, v)
 		if err != nil && strings.Contains(err.Error(), "looking for beginning of value") {
 			attempts--
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(throttleSleepTime)
 			continue
 		} else if err != nil {
 			return err
@@ -667,7 +668,7 @@ func (c *Client) createAndDoGetHeaders(method, relPath string, data, options, re
 		headers, err := c.doGetHeaders(req, resource)
 		if err != nil && strings.Contains(err.Error(), "looking for beginning of value") {
 			attempts--
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(throttleSleepTime)
 			continue
 		} else if err != nil {
 			return nil, err
