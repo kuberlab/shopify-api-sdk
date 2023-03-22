@@ -344,7 +344,7 @@ func NewClient(app App, shopName, token string, opts ...Option) *Client {
 // response. It does not make much sense to call Do without a prepared
 // interface instance.
 func (c *Client) Do(req *http.Request, v interface{}) error {
-	attempts := 5
+	attempts := 10
 	sleepTime := throttleSleepTime
 	for attempts > 0 {
 		_, err := c.doGetHeaders(req, v)
@@ -668,7 +668,7 @@ func (c *Client) createAndDoGetHeaders(method, relPath string, data, options, re
 		return nil, err
 	}
 
-	attempts := 5
+	attempts := 10
 	sleepTime := throttleSleepTime
 	for attempts > 0 {
 		headers, err := c.doGetHeaders(req, resource)
