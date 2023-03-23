@@ -646,7 +646,7 @@ func (c *Client) CreateAndDo(method, relPath string, data, options, resource int
 }
 
 func (c *Client) CreateAndDoGraphql(method string, data *GraphqlRequest, resource interface{}) (http.Header, error) {
-	relPath := path.Join(c.pathPrefix, graphqlBasePath)
+	relPath := path.Join(c.pathPrefix, fmt.Sprintf("api/%v", c.apiVersion), graphqlBasePath)
 	req, err := c.NewGraphqlRequest(method, relPath, data)
 	if err != nil {
 		return nil, err
